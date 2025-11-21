@@ -1,53 +1,38 @@
 # Release v1.0.0
 
-## 🎉 Primeira Release do Supaco Dashboard
+## Primeira Release do Supaco Dashboard
 
-### ✨ Funcionalidades Principais
+Dashboard desktop para estudantes do IFRN acessarem informações acadêmicas do SUAP.
 
-- 📊 **Dashboard Personalizado** - Visualize suas informações acadêmicas do SUAP
-- 📚 **Boletim de Notas** - Acompanhe suas notas e médias por disciplina
-- 📅 **Horários e Calendário** - Veja sua grade horária semanal
-- 🎯 **Análise de Frequência** - Monitore suas faltas e limite de ausências
-- 🤖 **Assistente IA** - Chat integrado com Gemini AI para tirar dúvidas
-- 🎨 **Temas Personalizáveis** - Interface com suporte a modo claro/escuro e wallpapers
-- 📈 **Gráficos e Estatísticas** - Visualize seu desempenho acadêmico
+### Funcionalidades
 
-### 🚀 Melhorias
+- Dashboard personalizado com informações acadêmicas
+- Boletim de notas por disciplina
+- Horários e calendário semanal
+- Análise de frequência e controle de faltas
+- Assistente IA integrado (Gemini)
+- Temas personalizáveis (claro/escuro)
+- Gráficos e estatísticas de desempenho
 
-- Interface moderna e responsiva
-- Animações suaves com Framer Motion
-- Integração completa com API do SUAP
-- Suporte a múltiplos temas e wallpapers
+### Instalação
 
-### 📦 Instalação
+**Linux (AppImage):**
+1. Baixe o arquivo `Supaco-0.0.0.AppImage`
+2. Torne executável: `chmod +x Supaco-0.0.0.AppImage`
+3. Execute: `./Supaco-0.0.0.AppImage`
 
-1. Baixe o arquivo `Supaco-1.0.0.AppImage`
-2. Torne-o executável:
-   ```bash
-   chmod +x Supaco-1.0.0.AppImage
-   ```
-3. Execute:
-   ```bash
-   ./Supaco-1.0.0.AppImage
-   ```
+**Windows:**
+1. Baixe o instalador `Supaco Setup 1.0.0.exe`
+2. Execute o instalador e siga as instruções
+3. O aplicativo será instalado e estará disponível no menu Iniciar
 
-### 🔧 Requisitos
+### Requisitos
 
-- Linux (x64)
-- Conexão com internet para autenticação no SUAP
-- Chave da API do Google Gemini (opcional, para o assistente IA)
+- Linux x64 ou Windows x64
+- Conexão com internet
+- Conta no SUAP do IFRN
+- Chave da API do Google Gemini (opcional, para assistente IA)
 
-### 📝 Notas
+### Notas
 
-- Esta é a primeira versão estável do aplicativo
-- O AppImage é portável e não requer instalação
-- Para atualizar, basta baixar a nova versão e substituir o arquivo antigo
-
-### 🐛 Problemas Conhecidos
-
-- Nenhum no momento
-
-### 🙏 Agradecimentos
-
-Desenvolvido com ❤️ para estudantes do IFRN
-
+Esta é a primeira versão estável. O AppImage é portável e não requer instalação no Linux. Para atualizar, baixe a nova versão e substitua o arquivo antigo.
