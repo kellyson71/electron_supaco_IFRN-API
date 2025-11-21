@@ -1,0 +1,77 @@
+{
+  "name": "supaco",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "ELECTRON=true vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:3000 && ELECTRON_IS_DEV=1 electron .\"",
+    "electron:build": "npm run build && electron .",
+    "electron:start": "electron .",
+    "dist": "npm run build && electron-builder --linux --x64",
+    "dist:appimage": "npm run build && electron-builder --linux AppImage",
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "dist:all": "npm run build && electron-builder --linux --win --x64"
+  },
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.554.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "9.0.1",
+    "recharts": "^3.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.3",
+    "electron-builder": "^26.0.12",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.supaco.app",
+    "productName": "Supaco",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Education"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "extraMetadata": {
+      "main": "electron/main.js"
+    }
+  }
+}
