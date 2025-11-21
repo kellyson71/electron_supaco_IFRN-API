@@ -9,8 +9,6 @@
 [![Electron](https://img.shields.io/badge/electron-39.2.3-blue.svg)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/react-19.2.0-61dafb.svg)](https://reactjs.org/)
 
-![Supaco Dashboard](https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6)
-
 </div>
 
 ---
