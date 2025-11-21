@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, CornerDownLeft } from 'lucide-react';
+import { X, Sparkles, CornerDownLeft, Settings } from 'lucide-react';
 import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
 import ReactMarkdown from 'react-markdown';
 import { GradeInfo, ProcessedClass, SuapProfile, Holiday } from '../types';
@@ -13,6 +13,7 @@ interface AIChatWidgetProps {
   grades: GradeInfo[];
   schedule: ProcessedClass[];
   holidays: Holiday[];
+  onRequestSettings: () => void;
 }
 
 interface Message {
@@ -21,7 +22,7 @@ interface Message {
   text: string;
 }
 
-export const AIChatWidget: React.FC<AIChatWidgetProps> = ({ isDarkMode, accentColor, userData, grades, schedule, holidays }) => {
+export const AIChatWidget: React.FC<AIChatWidgetProps> = ({ isDarkMode, accentColor, userData, grades, schedule, holidays, onRequestSettings }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -138,14 +139,33 @@ DIRETRIZES:
     setInput(''); 
     const userMsg: Message = { id: Date.now().toString(), role: 'user', text: userText };
     setMessages(prev => [...prev, userMsg]);
+
+    // --- CHECK API KEY ---
+    const apiKey = localStorage.getItem('gemini_api_key') || process.env.API_KEY;
+    
+    if (!apiKey) {
+        setIsLoading(true); // Brief pause for effect
+        setTimeout(() => {
+            const errorMsg: Message = { 
+                id: (Date.now() + 1).toString(), 
+                role: 'model', 
+                text: "⚠️ **Chave de API necessária.**\n\nPara continuar nossa conversa, preciso que você configure sua chave de API do Google (Gemini) nas configurações.\n\nRedirecionando você..."
+            };
+            setMessages(prev => [...prev, errorMsg]);
+            setIsLoading(false);
+            
+            // Slight delay before redirecting to allow user to read
+            setTimeout(() => {
+                onRequestSettings();
+            }, 1500);
+        }, 600);
+        return;
+    }
     
     setIsLoading(true);
     setTimeout(() => inputRef.current?.focus(), 10);
 
     try {
-      const apiKey = localStorage.getItem('gemini_api_key') || process.env.API_KEY;
-      if (!apiKey) throw new Error("API Key missing");
-
       const ai = new GoogleGenAI({ apiKey });
       
       // 1. Initial Request with Tools
@@ -207,7 +227,7 @@ DIRETRIZES:
       const errorMsg: Message = { 
         id: (Date.now() + 1).toString(), 
         role: 'model', 
-        text: "Erro de conexão ou configuração. Verifique se sua API Key está válida nas configurações."
+        text: "Erro de conexão ou autenticação. Verifique se sua API Key está correta nas configurações."
       };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
@@ -261,12 +281,21 @@ DIRETRIZES:
                           Assistente
                       </span>
                   </div>
-                  <button 
-                      onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                      className={`p-1.5 rounded-full transition-colors ${isDarkMode ? 'hover:bg-white/10 text-white/50' : 'hover:bg-black/5 text-black/50'}`}
-                  >
-                      <X size={16} />
-                  </button>
+                  <div className="flex gap-1">
+                      <button 
+                          onClick={onRequestSettings}
+                          title="Configurações da IA"
+                          className={`p-1.5 rounded-full transition-colors ${isDarkMode ? 'hover:bg-white/10 text-white/50' : 'hover:bg-black/5 text-black/50'}`}
+                      >
+                          <Settings size={16} />
+                      </button>
+                      <button 
+                          onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                          className={`p-1.5 rounded-full transition-colors ${isDarkMode ? 'hover:bg-white/10 text-white/50' : 'hover:bg-black/5 text-black/50'}`}
+                      >
+                          <X size={16} />
+                      </button>
+                  </div>
               </div>
 
               {/* Messages Area */}

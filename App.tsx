@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DashboardLayout } from './components/DashboardLayout';
 import { ContentView } from './components/ContentViews';
-import { ViewState, ThemeVariant, SuapProfile, SuapMeusDadosAluno, SuapPeriod, SuapBoletim, SuapDiarioResponse, ProcessedClass, GradeInfo, SuapCompletionData, Holiday } from './types';
+import { ViewState, ThemeVariant, SuapProfile, SuapMeusDadosAluno, SuapPeriod, SuapBoletim, SuapDiarioResponse, ProcessedClass, GradeInfo, SuapCompletionData, Holiday, ClassroomWork, ClassroomCourse } from './types';
 import { AnimatePresence } from 'framer-motion';
 
 const DEFAULT_WALLPAPER = "https://images2.alphacoders.com/134/thumb-1920-1345658.png";
@@ -54,6 +54,10 @@ const App: React.FC = () => {
       return localStorage.getItem(CACHE_KEYS.WALLPAPER) || DEFAULT_WALLPAPER;
   });
   
+  // UI State
+  const [rightSidebarTab, setRightSidebarTab] = useState<'overview' | 'tasks' | 'holidays'>('overview');
+  const [profileInitialTab, setProfileInitialTab] = useState<'profile' | 'settings' | 'wallpaper'>('profile');
+
   // Auth State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
@@ -65,6 +69,10 @@ const App: React.FC = () => {
   const [processedGrades, setProcessedGrades] = useState<GradeInfo[]>([]);
   const [completionData, setCompletionData] = useState<SuapCompletionData | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [classroomWork, setClassroomWork] = useState<ClassroomWork[]>([]);
+
+  // Auto Expand Classroom Setting Logic
+  const [autoExpandClassroom, setAutoExpandClassroom] = useState(false);
 
   // --- PERSISTENCE HELPERS ---
 
@@ -80,6 +88,107 @@ const App: React.FC = () => {
   useEffect(() => {
       localStorage.setItem(CACHE_KEYS.WALLPAPER, currentWallpaper);
   }, [currentWallpaper]);
+
+  // --- OAUTH CALLBACK HANDLER ---
+  useEffect(() => {
+      const hash = window.location.hash;
+      // Look for access_token in the URL hash (Google Implicit Flow)
+      if (hash && hash.includes('access_token')) {
+          const params = new URLSearchParams(hash.substring(1)); // remove #
+          const accessToken = params.get('access_token');
+          
+          if (accessToken) {
+              console.log("Google Access Token detected via URL Hash");
+              
+              // Save token to localStorage
+              localStorage.setItem('google_classroom_token', accessToken);
+              
+              // Clear the hash from URL to prevent issues and clean up
+              window.history.replaceState(null, '', window.location.pathname);
+              
+              // Automatically open the Settings > Integrations > Classroom panel
+              // We use a small timeout to ensure the app is fully mounted/ready if needed
+              setTimeout(() => {
+                  setCurrentView(ViewState.PROFILE);
+                  setProfileInitialTab('settings');
+                  setAutoExpandClassroom(true);
+              }, 100);
+          }
+      }
+  }, []);
+
+  // --- KEYBOARD SHORTCUTS ---
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.repeat) return; // Prevent repeating keydown events
+
+        // Ignore if user is typing in an input field
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+        // ESC to close modals
+        if (e.key === 'Escape') {
+            handleCloseOverlay();
+            return;
+        }
+
+        // CTRL + Number for Main Navigation
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+            switch(e.key) {
+                case '1': 
+                    e.preventDefault();
+                    setCurrentView(ViewState.DASHBOARD); 
+                    break;
+                case '2': 
+                    e.preventDefault();
+                    setCurrentView(ViewState.GRADES); 
+                    break;
+                case '3': 
+                    e.preventDefault();
+                    setCurrentView(ViewState.ABSENCES); 
+                    break;
+                case '4': 
+                    e.preventDefault();
+                    setCurrentView(ViewState.SCHEDULE); 
+                    break;
+                case '5': 
+                    e.preventDefault();
+                    setCurrentView(ViewState.CLASSROOM); 
+                    break;
+                case '6': 
+                    e.preventDefault();
+                    setCurrentView(ViewState.CONCLUSION); 
+                    break;
+                case 'i':
+                case 'I':
+                    e.preventDefault();
+                    setCurrentView(ViewState.PROFILE);
+                    setProfileInitialTab('settings');
+                    break;
+            }
+        }
+
+        // ALT + Number for Right Sidebar Tabs
+        if (e.altKey && !e.ctrlKey && !e.metaKey) {
+             switch(e.key) {
+                case '1':
+                    e.preventDefault();
+                    setRightSidebarTab('overview');
+                    break;
+                case '2':
+                    e.preventDefault();
+                    setRightSidebarTab('tasks');
+                    break;
+                case '3':
+                    e.preventDefault();
+                    setRightSidebarTab('holidays');
+                    break;
+             }
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Load cached data into state
   const loadCache = () => {
@@ -110,14 +219,37 @@ const App: React.FC = () => {
       }
   };
 
-  // --- API FETCHING ---
+  // --- API FETCHING & REFRESH ---
+
+  const refreshSuapToken = async () => {
+      const refresh = localStorage.getItem('suap_refresh_token');
+      if (!refresh) return false;
+
+      try {
+          const response = await fetch('https://suap.ifrn.edu.br/api/token/refresh/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refresh })
+          });
+
+          if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem('suap_access_token', data.access);
+              if (data.refresh) localStorage.setItem('suap_refresh_token', data.refresh);
+              return true;
+          }
+      } catch (e) {
+          console.error("Refresh token failed", e);
+      }
+      return false;
+  };
 
   const fetchWithAuth = async (url: string) => {
-    const token = localStorage.getItem('suap_access_token');
+    let token = localStorage.getItem('suap_access_token');
     if (!token) return null;
 
     try {
-        const response = await fetch(url, {
+        let response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -125,10 +257,23 @@ const App: React.FC = () => {
         });
 
         if (response.status === 401) {
-            localStorage.removeItem('suap_access_token');
-            localStorage.removeItem('suap_refresh_token');
-            setIsLoggedIn(false);
-            return null;
+            console.log("Access Token Expired. Attempting Refresh...");
+            const refreshed = await refreshSuapToken();
+            
+            if (refreshed) {
+                // Retry with new token
+                token = localStorage.getItem('suap_access_token');
+                response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+            } else {
+                // Refresh failed, logout
+                handleLogout();
+                return null;
+            }
         }
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -152,6 +297,40 @@ const App: React.FC = () => {
       } catch (error) {
           console.warn("Failed to update holidays (offline)", error);
       }
+  };
+
+  const fetchClassroomData = async () => {
+    const token = localStorage.getItem('google_classroom_token');
+    if (!token) return;
+
+    try {
+        const coursesRes = await fetch('https://classroom.googleapis.com/v1/courses?courseStates=ACTIVE', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!coursesRes.ok) return;
+        const coursesData = await coursesRes.json();
+        const courses: ClassroomCourse[] = coursesData.courses || [];
+
+        const workPromises = courses.map(async (course) => {
+            const workRes = await fetch(`https://classroom.googleapis.com/v1/courses/${course.id}/courseWork?orderBy=dueDate desc`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!workRes.ok) return [];
+            const workData = await workRes.json();
+            return (workData.courseWork || []).map((w: ClassroomWork) => ({
+                ...w,
+                courseName: course.name,
+                jsDate: w.dueDate ? new Date(w.dueDate.year, w.dueDate.month - 1, w.dueDate.day, w.dueTime?.hours || 23, w.dueTime?.minutes || 59) : undefined
+            }));
+        });
+
+        const allWork = (await Promise.all(workPromises)).flat();
+        const futureWork = allWork.filter(w => w.jsDate && w.jsDate >= new Date()).sort((a, b) => a.jsDate!.getTime() - b.jsDate!.getTime());
+        
+        setClassroomWork(futureWork);
+    } catch (e) {
+        console.error("Failed to fetch classroom data", e);
+    }
   };
 
   const fetchUserData = async () => {
@@ -194,6 +373,9 @@ const App: React.FC = () => {
                 await fetchAcademicData(activePeriod.semestre);
             }
         }
+        
+        // 6. Fetch Classroom
+        fetchClassroomData();
 
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -321,6 +503,14 @@ const App: React.FC = () => {
 
   const handleViewChange = (view: ViewState) => {
     setCurrentView(view);
+    // Reset profile tab to default if opening via click
+    if (view === ViewState.PROFILE) setProfileInitialTab('profile');
+  };
+
+  // New Handler to Open Settings Directly
+  const handleOpenSettings = () => {
+      setCurrentView(ViewState.PROFILE);
+      setProfileInitialTab('settings');
   };
 
   const handleCloseOverlay = () => {
@@ -341,6 +531,7 @@ const App: React.FC = () => {
       localStorage.removeItem('suap_access_token');
       localStorage.removeItem('suap_refresh_token');
       localStorage.removeItem('suap_username');
+      localStorage.removeItem('google_classroom_token'); // Also clear integration
       
       // Clear User Data Cache (But keep settings like wallpaper/api key)
       localStorage.removeItem(CACHE_KEYS.PROFILE);
@@ -358,6 +549,7 @@ const App: React.FC = () => {
       setProcessedGrades([]);
       setCompletionData(null);
       setCurrentPeriod(null);
+      setClassroomWork([]);
       
       setIsLoggedIn(false);
       setCurrentView(ViewState.DASHBOARD);
@@ -397,6 +589,10 @@ const App: React.FC = () => {
         schedule={processedSchedule}
         completionData={completionData}
         holidays={holidays}
+        classroomWork={classroomWork}
+        rightTab={rightSidebarTab}
+        onRightTabChange={setRightSidebarTab}
+        onOpenSettings={handleOpenSettings}
       />
 
       {/* Overlays */}
@@ -404,7 +600,8 @@ const App: React.FC = () => {
         {currentView !== ViewState.DASHBOARD && (
           <ContentView 
             view={currentView} 
-            onClose={handleCloseOverlay} 
+            onClose={handleCloseOverlay}
+            onChangeView={handleViewChange}
             isDarkMode={isDarkMode}
             onToggleTheme={toggleTheme}
             currentWallpaper={currentWallpaper}
@@ -419,6 +616,9 @@ const App: React.FC = () => {
             schedule={processedSchedule}
             completionData={completionData}
             onLogout={handleLogout}
+            autoExpandClassroom={autoExpandClassroom}
+            onAutoExpandClassroom={setAutoExpandClassroom}
+            initialProfileTab={profileInitialTab}
           />
         )}
       </AnimatePresence>
