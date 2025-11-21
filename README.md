@@ -2,11 +2,11 @@
 
 Dashboard acadêmico para estudantes do IFRN com integração ao SUAP e Google Sala de Aula.
 
+🌐 **Aplicação Web**: [https://supaco.vercel.app/](https://supaco.vercel.app/)
+
 ## Sobre
 
 O Supaco é uma aplicação que centraliza informações acadêmicas do SUAP (Sistema Unificado de Administração Pública) e do Google Sala de Aula em uma interface moderna e intuitiva. Disponível como aplicação web e desktop.
-
-**Versão Web**: [https://supaco.vercel.app/](https://supaco.vercel.app/)
 
 ## Funcionalidades
 
