@@ -1,45 +1,61 @@
-<div align="center">
+# Supaco
 
-# 🎓 Supaco Dashboard
+Dashboard acadêmico para estudantes do IFRN com integração ao SUAP e Google Sala de Aula.
 
-**Um dashboard moderno e elegante para estudantes do IFRN**
+## Sobre
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
-[![Electron](https://img.shields.io/badge/electron-39.2.3-blue.svg)](https://www.electronjs.org/)
-[![React](https://img.shields.io/badge/react-19.2.0-61dafb.svg)](https://reactjs.org/)
+O Supaco é uma aplicação que centraliza informações acadêmicas do SUAP (Sistema Unificado de Administração Pública) e do Google Sala de Aula em uma interface moderna e intuitiva. Disponível como aplicação web e desktop.
 
-</div>
+**Versão Web**: [https://supaco.vercel.app/](https://supaco.vercel.app/)
 
----
+## Funcionalidades
 
-## 📋 Sobre o Projeto
+- **Dashboard Personalizado**: Visualização consolidada de informações acadêmicas
+- **Integração com SUAP**: Acesso direto a notas, frequência, horários e dados do perfil
+- **Integração com Google Sala de Aula**: Visualização de tarefas e eventos do calendário
+- **Análise de Frequência**: Monitoramento de faltas e limites por disciplina
+- **Assistente IA com Contexto**: Chat integrado que utiliza seus dados acadêmicos para responder perguntas personalizadas
+- **Temas Personalizáveis**: Suporte a modo claro/escuro e múltiplos temas
 
-**Supaco Dashboard** é uma aplicação desktop moderna desenvolvida com React e Electron que oferece uma interface intuitiva para estudantes do IFRN acessarem informações acadêmicas do SUAP (Sistema Unificado de Administração Pública).
+## Assistente IA
 
-### ✨ Principais Funcionalidades
+O assistente utiliza a API do Google Gemini e possui acesso ao contexto completo dos seus dados acadêmicos, incluindo:
 
-- 📊 **Dashboard Personalizado** - Visualize suas informações acadêmicas de forma organizada
-- 📚 **Boletim de Notas** - Acompanhe suas notas e médias por disciplina
-- 📅 **Horários e Calendário** - Veja sua grade horária e eventos importantes
-- 🎯 **Análise de Frequência** - Monitore suas faltas e limite de ausências
-- 🤖 **Assistente IA** - Chat integrado com Gemini AI para tirar dúvidas
-- 🎨 **Temas Personalizáveis** - Interface com suporte a modo claro/escuro e wallpapers
-- 📈 **Gráficos e Estatísticas** - Visualize seu desempenho acadêmico
+- Notas e médias por disciplina
+- Horários de aula e localização
+- Frequência e faltas
+- Tarefas e eventos do Google Sala de Aula
+- Feriados e calendário acadêmico
 
----
+**Importante**: Para utilizar o assistente IA, é necessário configurar sua própria chave da API do Google Gemini.
 
-## 🚀 Tecnologias
+## Screenshots
+
+### Dashboard Principal
+
+![Dashboard Principal](assets_readme/home.png)
+
+### Análise de Frequência
+
+![Análise de Frequência](assets_readme/faltas.png)
+
+### Integração com Google Sala de Aula
+
+![Google Sala de Aula](assets_readme/classroom.png)
+
+### Assistente IA
+
+![Assistente IA](assets_readme/ia-chat.png)
+
+## Tecnologias
 
 - **Frontend**: React 19, TypeScript, Vite
 - **Desktop**: Electron 39
-- **UI**: Tailwind CSS, Framer Motion, Lucide Icons
-- **Charts**: Recharts
-- **AI**: Google Gemini API
+- **UI**: Tailwind CSS, Framer Motion
+- **Gráficos**: Recharts
+- **IA**: Google Gemini API
 
----
-
-## 📦 Instalação
+## Instalação
 
 ### Pré-requisitos
 
@@ -50,30 +66,30 @@
 ### Instalação Local
 
 ```bash
-# Clone o repositório
 git clone https://github.com/seu-usuario/supaco-react.git
 cd supaco-react
-
-# Instale as dependências
 npm install
-
-# Configure a chave da API (opcional)
-echo "GEMINI_API_KEY=sua-chave-aqui" > .env.local
 ```
 
----
+### Configuração da API Gemini
 
-## 🎮 Como Usar
+Crie um arquivo `.env.local` na raiz do projeto:
 
-### Modo Desenvolvimento (Web)
+```bash
+GEMINI_API_KEY=sua-chave-aqui
+```
+
+## Uso
+
+### Desenvolvimento (Web)
 
 ```bash
 npm run dev
 ```
 
-Acesse `http://localhost:3000` no navegador.
+Acesse `http://localhost:5173` no navegador.
 
-### Modo Desenvolvimento (Electron)
+### Desenvolvimento (Electron)
 
 ```bash
 npm run electron:dev
@@ -82,16 +98,11 @@ npm run electron:dev
 ### Build de Produção
 
 ```bash
-# Build do React
 npm run build
-
-# Executar Electron
 npm run electron:start
 ```
 
----
-
-## 📱 Gerar Executáveis
+## Gerar Executáveis
 
 ### Linux (AppImage)
 
@@ -103,13 +114,10 @@ O arquivo será gerado em `release/Supaco-*.AppImage`
 
 ### Windows (EXE)
 
-**Nota**: Para gerar builds Windows no Linux, é necessário instalar Wine:
+Para gerar builds Windows no Linux, é necessário instalar Wine:
 
 ```bash
-# Ubuntu/Debian
 sudo apt-get install wine
-
-# Depois execute:
 npm run dist:win
 ```
 
@@ -121,90 +129,61 @@ O instalador será gerado em `release/`
 npm run dist:all
 ```
 
----
-
-## 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 supaco-react/
-├── components/          # Componentes React
+├── components/
 │   ├── DashboardLayout.tsx
-│   ├── ContentViews.tsx
 │   ├── AIChatWidget.tsx
 │   └── InvertedCorner.tsx
-├── electron/           # Código do Electron
+├── electron/
 │   ├── main.js
 │   └── preload.js
-├── dist/               # Build de produção
-├── release/            # Executáveis gerados
-├── App.tsx             # Componente principal
-├── types.ts            # Definições TypeScript
-├── vite.config.ts      # Configuração do Vite
-└── package.json        # Dependências e scripts
+├── assets_readme/
+│   ├── home.png
+│   ├── faltas.png
+│   ├── classroom.png
+│   └── ia-chat.png
+├── App.tsx
+├── types.ts
+├── vite.config.ts
+└── package.json
 ```
 
----
-
-## 🔧 Scripts Disponíveis
+## Scripts Disponíveis
 
 | Script | Descrição |
 |--------|-----------|
 | `npm run dev` | Inicia servidor de desenvolvimento |
 | `npm run build` | Gera build de produção |
 | `npm run electron:dev` | Executa Electron em modo desenvolvimento |
-| `npm run electron:build` | Build e executa Electron |
+| `npm run electron:start` | Executa Electron após build |
 | `npm run dist:appimage` | Gera AppImage para Linux |
 | `npm run dist:win` | Gera executável para Windows |
 | `npm run dist:all` | Gera todos os formatos |
 
----
-
-## 🎨 Recursos Visuais
-
-- **Temas Dinâmicos**: Múltiplos temas baseados em wallpapers
-- **Animações Suaves**: Transições com Framer Motion
-- **Design Moderno**: Interface limpa e intuitiva
-- **Responsivo**: Adaptável a diferentes tamanhos de tela
-
----
-
-## 🔐 Segurança
+## Segurança
 
 - Context Isolation habilitado
 - Node Integration desabilitado
 - Comunicação segura com APIs
 - Tokens armazenados localmente
 
----
+## Licença
 
-## 📝 Licença
+Este projeto está sob a licença MIT.
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+## Contribuindo
 
----
+Contribuições são bem-vindas. Para contribuir:
 
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-
-1. Fazer um Fork do projeto
-2. Criar uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abrir um Pull Request
+1. Faça um Fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
 
 ---
 
-## 📧 Contato
-
-Para dúvidas ou sugestões, abra uma [issue](https://github.com/seu-usuario/supaco-react/issues).
-
----
-
-<div align="center">
-
-**Desenvolvido com ❤️ para estudantes do IFRN**
-
-[⬆ Voltar ao topo](#-supaco-dashboard)
-
-</div>
+**Desenvolvido para estudantes do IFRN**
