@@ -105,7 +105,13 @@ O arquivo será gerado em `release/Supaco-*.AppImage`
 
 ### Windows (EXE)
 
+**Nota**: Para gerar builds Windows no Linux, é necessário instalar Wine:
+
 ```bash
+# Ubuntu/Debian
+sudo apt-get install wine
+
+# Depois execute:
 npm run dist:win
 ```
 
